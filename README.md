@@ -1,3 +1,3 @@
 "# Mask Detection" 
 
-![Screenshot](./fig1.png)
+![Screenshot](./fig.png)
