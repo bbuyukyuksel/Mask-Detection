@@ -2,6 +2,7 @@ import numpy as np
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 import matplotlib.pyplot as plt
 from funcs import *
+from datetime import datetime
  
 # Create Dirs
 train_dir, test_dir, validation_dir = create_dirs()
@@ -16,24 +17,25 @@ plt.imshow(img)
 plt.show()
 
 # Configs
-epochs = 3
+epochs = 2
 batch_size = 50
 
 # Load Datasets
 train_generator = load_and_normalize_dataset(train_dir, batch_size=batch_size)
-test_generator = load_and_normalize_dataset(test_dir, batch_size=batch_size)
+test_generator  = load_and_normalize_dataset(test_dir, batch_size=batch_size)
 
 # Create Model
 model = create_model()
 
-
 # Train or Predict Flag
-f_train = False
+f_train = True
+
 
 if f_train:
     history = train(model, train_generator, test_generator, epochs, visualize=True)
+    print("Elapsed Time", str(datetime.now() - current_time))
 else:
-    size = 4
+    size = 5
     model.load_weights("00_best_weights.hdf5")
     #x=model.evaluate(test_generator)
     # One image predict
@@ -49,14 +51,39 @@ else:
         "Masked", "Unmasked",
     ]
     
-    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.5, hspace=0.5)
+    plt.subplots_adjust(left=None, bottom=None, right=None, top=None, 
+                            wspace=0.5, hspace=0.5)
     for index, image in enumerate(images):
         if index == (size**2):
             break
         ax = plt.subplot(size,size, index+1)        
         plt.imshow(image)
         ax.set_title("{}".format( LABELS[predict_class[index][0]] ))
-    plt.show()    
-    
+    plt.show()
 
-    
+
+'''
+fname = "MaskDetection_128.jpg"
+fdir = os.path.join(validation_dir, "masked-gen", fname)
+myimg = load_img(fdir)
+myimg = myimg.resize( (150,150) )
+plt.imshow(myimg)
+plt.show()
+
+model.load_weights("00_best_weights.hdf5")
+
+# ilk deneme
+# print( model.predict(myimg) ) # Tür hatası
+
+arr_myimg = img_to_array(myimg)
+arr_myimg = arr_myimg / 255
+arr_myimg = arr_myimg.reshape( (1,) + arr_myimg.shape )
+
+olasilik_x = model.predict(arr_myimg)
+sinif_x = model.predict_classes(arr_myimg)
+
+LABEL = ["Maskeli", "Maskesiz"]
+
+print("Olasılık", olasilik_x)
+print("Sınf", LABEL[sinif_x[0][0]])
+'''

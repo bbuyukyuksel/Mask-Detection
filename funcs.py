@@ -2,7 +2,7 @@ from tensorflow.keras.layers import Dense, Flatten, Conv2D, MaxPool2D, Dropout
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.callbacks import ModelCheckpoint
-
+import matplotlib.pyplot as plt
 import os, shutil
 
 def create_dirs():
@@ -42,21 +42,22 @@ def create_dirs():
 
 def create_model():
     model = Sequential()
-    model.add(Conv2D(32,(3,3),activation='relu',input_shape=(150,150,3)))
+    model.add(Conv2D(32,(3,3),activation='relu',input_shape=(150,150,3))) # 148, 148, 32
     model.add(Dropout(0.2))
-    model.add(MaxPool2D((2,2)))
-    model.add(Conv2D(64,(3,3),activation='relu'))
+    model.add(MaxPool2D((2,2))) 
+    model.add(Conv2D(64,(3,3),activation='relu')) 
     model.add(Dropout(0.2))
-    model.add(MaxPool2D((2,2)))
+    model.add(MaxPool2D((2,2))) 
+    model.add(Conv2D(128,(3,3),activation='relu')) 
+    model.add(Dropout(0.2))
+    model.add(MaxPool2D((2,2))) 
     model.add(Conv2D(128,(3,3),activation='relu'))
-    model.add(Dropout(0.2))
-    model.add(MaxPool2D((2,2)))
-    model.add(Conv2D(128,(3,3),activation='relu'))
-    model.add(MaxPool2D((2,2)))
+    model.add(MaxPool2D((2,2))) 
     model.add(Flatten())
     model.add(Dropout(0.5))
     model.add(Dense(512,activation='relu'))
     model.add(Dense(1,activation='sigmoid'))
+    
     model.summary()
     model.compile(loss='binary_crossentropy',optimizer = 'Adam',metrics=['accuracy'])
     return model
@@ -69,10 +70,11 @@ def load_and_normalize_dataset(dir, batch_size=25, class_mode='binary'):
 def train(model, train_generator, validation_generator, epochs=20, visualize=True):
     filepath = './best_weights.hdf5'
     checkpoint = ModelCheckpoint(filepath, monitor='val_accuracy', verbose=1, save_best_only=True, mode='max')
+    current_time = datetime.now()
     history = model.fit(train_generator, epochs=epochs, validation_data=validation_generator, callbacks=[checkpoint])
+    print("Elapsed Time", str(datetime.now() - current_time))
     if visualize:
         visualize_loss_and_acc(history, epochs)
-
     return history
 
 def visualize_loss_and_acc(history, epochs):
@@ -80,7 +82,7 @@ def visualize_loss_and_acc(history, epochs):
     validation_acc = history.history['val_accuracy']
     train_loss = history.history['loss']
     validation_loss = history.history['val_loss']
-    epochs = range(1,21)
+    epochs = range(1, epochs+1)
     plt.plot(epochs,train_acc,'bo',label='Training Accuracy')
     plt.plot(epochs,validation_acc,'b',label='Validation Accuracy')
     plt.title('Training and Validation Accuracy')
